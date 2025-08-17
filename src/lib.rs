@@ -305,7 +305,16 @@ mod tests {
 
     #[test]
     fn test_detect_from_path_csv() {
-        let data = b"some random text";
-        assert_eq!(FileFinch::detect_from_path("data.csv", data), FileType::Csv);
+        let bytes = std::fs::read(
+            "Downloads/OS_Open_Built_Up_Areas_GeoPackage/os_open_built_up_areas.gpkg",
+        )
+        .unwrap();
+        assert_eq!(
+            FileFinch::detect_from_path(
+                "Downloads/OS_Open_Built_Up_Areas_GeoPackage/os_open_built_up_areas.gpkg",
+                &bytes
+            ),
+            FileType::Geopackage
+        );
     }
 }
