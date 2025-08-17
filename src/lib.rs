@@ -12,6 +12,7 @@ pub enum FileType {
     Unknown,
 }
 
+// TODO: I should add in Arvo and other common files types used in data processing/engineering
 impl fmt::Display for FileType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let name = match self {
