@@ -11,3 +11,4 @@ keywords = ["file-detection", "magic-numbers"]
 categories = ["data-processing"]
 
 [dependencies]
+muy_zipido = "0.1.1"

@@ -1,6 +1,6 @@
 use std::fmt;
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum FileType {
     Geopackage,
     Shapefile,
@@ -9,6 +9,7 @@ pub enum FileType {
     Csv,
     Parquet,
     Arrow,
+    Png,
     Unknown,
 }
 
@@ -23,6 +24,7 @@ impl fmt::Display for FileType {
             FileType::Csv => "CSV",
             FileType::Parquet => "Parquet",
             FileType::Arrow => "Arrow",
+            FileType::Png => "PNG",
             FileType::Unknown => "Unknown",
         };
         write!(f, "{}", name)
@@ -75,6 +77,7 @@ impl FileFinch {
 
     fn detect_by_magic(bytes: &[u8]) -> Option<FileType> {
         match bytes {
+            [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, ..] => Some(FileType::Png),
             [0x50, 0x4B, 0x03, 0x04, rest @ ..] => Self::detect_zip_content(rest),
             [0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1, ..] => Some(FileType::Excel),
             [0x50, 0x41, 0x52, 0x31, ..] => Some(FileType::Parquet),
@@ -194,36 +197,6 @@ impl FileFinch {
 
         false
     }
-
-    pub fn analyze_data_format(&self, data: &[u8]) {
-        let has_flatbuffer_header = data.len() >= 8;
-        let message_length = if has_flatbuffer_header {
-            u32::from_le_bytes([data[0], data[1], data[2], data[3]])
-        } else {
-            0
-        };
-
-        println!("Data analysis:");
-        println!("Size: {} bytes", data.len());
-        println!("Has FlatBuffer header: {}", has_flatbuffer_header);
-        if has_flatbuffer_header {
-            println!("Message length: {} bytes", message_length);
-        }
-        println!("First 16 bytes: {:02X?}", &data[0..data.len().min(16)]);
-        if data.len() > 16 {
-            println!("Last 16 bytes: {:02X?}", &data[data.len() - 16..]);
-        }
-
-        if data.starts_with(b"ARROW1") {
-            println!("Arrow IPC File format detected (starts with ARROW1 magic)");
-        } else if Self::is_arrow_ipc_stream(data) {
-            println!("Arrow IPC Stream format detected (FlatBuffer header)");
-            if data.len() >= 8 {
-                let metadata_length = u32::from_le_bytes([data[4], data[5], data[6], data[7]]);
-                println!("Metadata length: {} bytes", metadata_length);
-            }
-        }
-    }
 }
 
 #[cfg(test)]
@@ -278,7 +251,7 @@ mod tests {
     }
 
     #[test]
-    fn test_detect_arrow_ipc_file() {
+    fn test_detect_arrow_ipc() {
         let arrow_file = b"ARROW1\x00\x00";
         assert_eq!(FileFinch::detect(arrow_file), FileType::Arrow);
     }
@@ -299,23 +272,14 @@ mod tests {
     }
 
     #[test]
-    fn test_detect_unknown() {
-        let random_bytes = vec![0x12, 0x34, 0x56, 0x78];
-        assert_eq!(FileFinch::detect(&random_bytes), FileType::Unknown);
+    fn test_detect_png() {
+        let png_header = vec![0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
+        assert_eq!(FileFinch::detect(&png_header), FileType::Png);
     }
 
     #[test]
-    fn test_detect_from_path_csv() {
-        let bytes = std::fs::read(
-            "Downloads/OS_Open_Built_Up_Areas_GeoPackage/os_open_built_up_areas.gpkg",
-        )
-        .unwrap();
-        assert_eq!(
-            FileFinch::detect_from_path(
-                "Downloads/OS_Open_Built_Up_Areas_GeoPackage/os_open_built_up_areas.gpkg",
-                &bytes
-            ),
-            FileType::Geopackage
-        );
+    fn test_detect_unknown() {
+        let random_bytes = vec![0x12, 0x34, 0x56, 0x78];
+        assert_eq!(FileFinch::detect(&random_bytes), FileType::Unknown);
     }
 }
