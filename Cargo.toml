@@ -5,10 +5,9 @@ edition = "2024"
 authors = ["Chris C"]
 description = "A file format detection library supporting various data formats including Arrow, Parquet, CSV, Excel, GeoJSON, and more"
 readme = "README.md"
-repository = "https://github.com/yourusername/doorman"
+repository = "https://github.com/CHRISCARLON/FileFinch"
 license = "MIT"
 keywords = ["file-detection", "magic-numbers"]
-categories = ["data-processing"]
 
 [dependencies]
 muy_zipido = "0.1.1"
