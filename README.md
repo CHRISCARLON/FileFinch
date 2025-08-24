@@ -1,4 +1,5 @@
 # FileFinch
+<img alt="Crates.io Version" src="https://img.shields.io/crates/v/file_finch"> <img alt="Crates.io Downloads" src="https://img.shields.io/crates/d/file_finch">
 
 Reliable file format detection library written in Rust.
 
