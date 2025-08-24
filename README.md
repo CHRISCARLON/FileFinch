@@ -6,7 +6,7 @@ FileFinch can identify various data formats by examining file contents and magic
 
 ## Features
 
-- Detects multiple file formats including:
+Detects multiple file formats including:
 
 ```rust
 pub enum FileType {
