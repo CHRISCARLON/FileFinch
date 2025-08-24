@@ -7,11 +7,17 @@ FileFinch can identify various data formats by examining file contents and magic
 ## Features
 
 - Detects multiple file formats including:
-  - Apache Arrow
-  - Apache Parquet
-  - CSV
-  - Excel (XLS/XLSX)
-  - GeoJSON
-  - GeoPackage
-  - Shapefile
-  - More to come
+
+```rust
+pub enum FileType {
+    Geopackage,
+    Shapefile,
+    Geojson,
+    Excel,
+    Csv,
+    Parquet,
+    Arrow,
+    Png,
+    Unknown,
+}
+```
